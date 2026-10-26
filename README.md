@@ -1,42 +1,54 @@
-# FORMA — Plataforma (protótipo)
+# Forma Studio
 
-Site + demo funcional da FORMA, pronto para publicar no Vercel.
+Editor de imagens no navegador, no estilo Photoshop, com interface própria da Forma. Inclui a landing page (`/`) e o editor (`/#/editor`).
 
-## O que está aqui
+## O que tem
 
-- `app/page.jsx` — carrega o site (`components/FormaSite.jsx`): landing, cadastro, onboarding, dashboards de cliente/designer/admin.
-- `app/api/briefing/route.js` — rota de servidor que chama a API da Anthropic para o Assistente de Briefing com IA, mantendo a chave protegida (nunca exposta no navegador).
+- **14 ferramentas**: Mover, Letreiro, Cortar, Conta-gotas, Pincel, Borracha, Gradiente, Lata de tinta, Texto, Retângulo, Elipse, Linha, Mão e Lupa
+- **Camadas**: arrastar para reordenar, visibilidade, bloqueio, renomear, agrupar, duplicar, mesclar abaixo/visíveis, achatar, 16 modos de mesclagem e opacidade
+- **Ajustes ao vivo** em imagens: exposição, brilho, contraste, saturação, vibração, temperatura, matiz, nitidez, desfoque, granulado, vinheta, P&B, sépia, inverter
+- **18 looks de cinema** (LUTs 3D) com prévia na própria foto e intensidade ajustável
+- **Seleção retangular**: copiar para nova camada, apagar a área, preencher, cortar
+- **Histórico** com desfazer/refazer e painel de estados
+- **Exportação** PNG/JPG/WEBP em 0.5x–3x; projeto salvo como `.forma`; salvamento automático no navegador
+- **Atalhos** no padrão Photoshop e paleta de comandos (`Ctrl+K`)
 
-## Como publicar no Vercel
-
-**Opção 1 — pelo site, sem usar terminal**
-1. Crie um repositório no GitHub e suba esta pasta inteira nele.
-2. Acesse [vercel.com/new](https://vercel.com/new) e importe esse repositório.
-3. Antes de clicar em "Deploy", abra **Environment Variables** e adicione:
-   - `ANTHROPIC_API_KEY` = sua chave, gerada em [console.anthropic.com](https://console.anthropic.com/)
-4. Clique em Deploy. Em cerca de 1 minuto você recebe uma URL pública (`algo.vercel.app`).
-
-**Opção 2 — pelo terminal (Vercel CLI)**
-```bash
-npm i -g vercel
-cd forma-vercel
-vercel
-# na primeira pergunta, confirme criar um novo projeto
-vercel env add ANTHROPIC_API_KEY
-vercel --prod
-```
-
-## Rodando localmente antes de publicar (opcional)
+## Rodar localmente
 
 ```bash
 npm install
-cp .env.example .env.local
-# edite .env.local e cole sua ANTHROPIC_API_KEY
-npm run dev
+npm run dev        # http://localhost:5173
+npm run build      # gera dist/
 ```
-Abra http://localhost:3000
 
-## Observações
+## Publicar na Vercel
 
-- Sem a `ANTHROPIC_API_KEY` configurada, todo o site funciona normalmente — só o botão **"Criar projeto com IA"** mostra uma mensagem de erro amigável.
-- Os dados (projetos, mensagens, faturas etc.) são mockados em memória, para fins de demonstração — nada é salvo em banco de dados ainda. Isso está descrito como próximo passo no documento de arquitetura da FORMA.
+1. Em [vercel.com/new](https://vercel.com/new), importe este repositório.
+2. A Vercel detecta Vite sozinha (há um `vercel.json`). Clique em **Deploy**.
+3. A partir daí, cada push na `main` publica uma versão nova.
+
+Não há variáveis de ambiente: tudo roda no navegador.
+
+## Estrutura
+
+```
+src/
+├── landing/Landing.tsx    # landing page
+├── editor/
+│   ├── engine.ts          # motor sobre o Fabric.js: camadas, ferramentas, histórico, exportação
+│   ├── commands.ts        # menus, atalhos e paleta de comandos (uma lista só)
+│   ├── lut.ts             # filtros próprios: LUT 3D, vinheta, temperatura
+│   ├── panels.tsx         # Propriedades, Ajustes, Cor, Camadas, Histórico
+│   ├── Editor.tsx         # layout, barras, diálogos
+│   └── ui.tsx             # controles (sliders, campos, seletor de cor)
+├── data/luts.ts           # LUTs reamostrados para 17³
+└── assets/tools/          # ícones das ferramentas
+```
+
+## Créditos
+
+- [Fabric.js](https://fabricjs.com) — motor de canvas (MIT)
+- [PhotoSplice](https://github.com/eolix/PhotoSplice) / [PhotoCraft](https://github.com/storytold/photocraft) (MIT/Apache-2.0) — de onde vêm:
+  - ícones das ferramentas: [Tabler Icons](https://tabler.io/icons), MIT (`src/assets/tools/LICENSE-tabler.txt`)
+  - LUTs de cor: [Fresh LUTs](https://freshluts.com), CC0, reamostrados para 17×17×17
+  - referência de conjunto de ferramentas, atalhos e organização dos painéis
