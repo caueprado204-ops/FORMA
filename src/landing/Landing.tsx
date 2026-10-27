@@ -250,7 +250,7 @@ export default function Landing() {
           <div className="footer-credits">
             Motor de canvas: <a href="https://fabricjs.com" target="_blank" rel="noreferrer">Fabric.js</a> (MIT)<br />
             Ícones de ferramentas e LUTs: <a href="https://github.com/eolix/PhotoSplice" target="_blank" rel="noreferrer">PhotoSplice</a> / PhotoCraft (MIT · Tabler · CC0)<br />
-            © {new Date().getFullYear()} Forma
+            <a href="/privacidade.html">Política de Privacidade</a> · © {new Date().getFullYear()} Forma
           </div>
         </div>
       </footer>
