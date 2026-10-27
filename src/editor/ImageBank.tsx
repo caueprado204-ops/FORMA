@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ExternalLink, Images, Link2, LogOut, Pin, Search, X, Loader, CloudOff, Plus } from 'lucide-react';
-import type { FormaEngine } from './engine';
+import { BANK_MIME, type Inserter } from './library-types';
 
 export type BankImage = {
   id: string; title: string; thumb: string; full: string; width?: number; height?: number;
@@ -9,7 +9,7 @@ export type BankImage = {
 type Board = { id: string; name: string; count: number | null; cover: string | null };
 type Me = { configured: boolean; connected: boolean; user?: { username: string; avatar?: string; name: string } };
 
-export const BANK_MIME = 'application/x-forma-image';
+
 
 async function api<T>(path: string): Promise<T> {
   const r = await fetch(path, { credentials: 'same-origin' });
@@ -27,14 +27,14 @@ function layerName(img: BankImage) {
 }
 
 // ───────────────────────── grade de imagens ─────────────────────────
-function Grid({ images, e, loading, onMore, more }: { images: BankImage[]; e: FormaEngine; loading: boolean; onMore?: () => void; more: boolean }) {
-  const place = (img: BankImage) => e.placeRemote(img.full, layerName(img));
+function Grid({ images, ins, loading, onMore, more }: { images: BankImage[]; ins: Inserter; loading: boolean; onMore?: () => void; more: boolean }) {
+  const place = (img: BankImage) => ins.image(img.full, layerName(img));
   return (
     <>
       <div className="bank-grid">
         {images.map((img) => (
           <figure key={`${img.source}-${img.id}`} className="bank-item"
-            draggable
+            draggable={ins.canDrag}
             onDragStart={(ev) => {
               ev.dataTransfer.setData(BANK_MIME, JSON.stringify({ url: img.full, name: layerName(img) }));
               ev.dataTransfer.effectAllowed = 'copy';
@@ -60,7 +60,7 @@ function Grid({ images, e, loading, onMore, more }: { images: BankImage[]; e: Fo
 }
 
 // ───────────────────────── colar link de pin ─────────────────────────
-function PinLink({ e }: { e: FormaEngine }) {
+function PinLink({ ins }: { ins: Inserter }) {
   const [v, setV] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -69,7 +69,7 @@ function PinLink({ e }: { e: FormaEngine }) {
     setBusy(true); setErr('');
     try {
       const { image } = await api<{ image: BankImage }>(`/api/pinterest/pin?url=${encodeURIComponent(v.trim())}`);
-      await e.placeRemote(image.full, layerName(image));
+      await ins.image(image.full, layerName(image));
       setV('');
     } catch (x: any) {
       setErr(x.message === 'offline' ? 'Disponível na versão publicada do site.' : x.message);
@@ -92,7 +92,7 @@ function PinLink({ e }: { e: FormaEngine }) {
 }
 
 // ───────────────────────── aba Pinterest ─────────────────────────
-function PinterestTab({ e }: { e: FormaEngine }) {
+function PinterestTab({ ins }: { ins: Inserter }) {
   const [me, setMe] = useState<Me | null>(null);
   const [offline, setOffline] = useState(false);
   const [boards, setBoards] = useState<Board[]>([]);
@@ -184,11 +184,11 @@ function PinterestTab({ e }: { e: FormaEngine }) {
           </div>
           {err && <p className="bank-err">{err}</p>}
           {!loading && !err && !images.length && <div className="bank-state">Nenhum pin encontrado.</div>}
-          <Grid images={images} e={e} loading={loading} more={!!bookmark} onMore={() => load({ board, q: board ? undefined : q, more: bookmark })} />
+          <Grid images={images} ins={ins} loading={loading} more={!!bookmark} onMore={() => load({ board, q: board ? undefined : q, more: bookmark })} />
         </>
       )}
 
-      <PinLink e={e} />
+      <PinLink ins={ins} />
     </div>
   );
 }
@@ -196,7 +196,7 @@ function PinterestTab({ e }: { e: FormaEngine }) {
 // ───────────────────────── aba Banco livre ─────────────────────────
 const SUGGEST = ['Textura', 'Céu', 'Montanha', 'Flores', 'Oceano', 'Cidade', 'Abstrato', 'Folhas', 'Papel', 'Neon'];
 
-function LivreTab({ e }: { e: FormaEngine }) {
+function LivreTab({ ins }: { ins: Inserter }) {
   const [q, setQ] = useState('');
   const [term, setTerm] = useState('Textura');
   const [images, setImages] = useState<BankImage[]>([]);
@@ -237,28 +237,22 @@ function LivreTab({ e }: { e: FormaEngine }) {
       </div>
       {err && <p className="bank-err">{err}</p>}
       {!loading && !err && !images.length && <div className="bank-state">Nada encontrado para “{term}”.</div>}
-      <Grid images={images} e={e} loading={loading} more={page < pages} onMore={() => load(term, page + 1)} />
+      <Grid images={images} ins={ins} loading={loading} more={page < pages} onMore={() => load(term, page + 1)} />
       <p className="bank-note">Fotos do Flickr e da Wikimedia com licença Creative Commons que permite editar e usar comercialmente, via Openverse. Licenças CC BY pedem crédito ao autor: o nome dele vai junto no nome da camada.</p>
     </div>
   );
 }
 
-// ───────────────────────── gaveta ─────────────────────────
-export function ImageBank({ e, onClose, initialTab = 'pinterest' }: { e: FormaEngine; onClose: () => void; initialTab?: 'pinterest' | 'livre' }) {
-  const [tab, setTab] = useState<'pinterest' | 'livre'>(initialTab);
+// ───────────────────────── aba Imagens ─────────────────────────
+export function ImagesTab({ ins }: { ins: Inserter }) {
+  const [tab, setTab] = useState<'pinterest' | 'livre'>('pinterest');
   return (
-    <aside className="bank" aria-label="Banco de imagens">
-      <header className="bank-head">
-        <Images size={16} />
-        <h3>Banco de imagens</h3>
-        <button className="iconbtn" onClick={onClose} aria-label="Fechar banco de imagens"><X size={15} /></button>
-      </header>
-      <nav className="seg bank-tabs">
+    <>
+      <nav className="seg bank-tabs sub">
         <button className={tab === 'pinterest' ? 'on' : ''} onClick={() => setTab('pinterest')}><Pin size={13} />Pinterest</button>
         <button className={tab === 'livre' ? 'on' : ''} onClick={() => setTab('livre')}><Images size={13} />Banco livre</button>
       </nav>
-      <p className="bank-hint">Clique para colocar no centro ou arraste até a tela.</p>
-      {tab === 'pinterest' ? <PinterestTab e={e} /> : <LivreTab e={e} />}
-    </aside>
+      {tab === 'pinterest' ? <PinterestTab ins={ins} /> : <LivreTab ins={ins} />}
+    </>
   );
 }

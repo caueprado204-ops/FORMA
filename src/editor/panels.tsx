@@ -160,6 +160,19 @@ export function PropertiesPanel({ e }: { e: FormaEngine }) {
         </Section>
       )}
 
+      {!multi && !isShape && !isText && e.tintParts(o).length > 0 && (
+        <Section title="Cor do elemento">
+          <div className="field"><span>Cor</span>
+            <ColorField value={e.elementColor(o)} onChange={(v) => e.setElementColor(o, v)} onCommit={() => e.commit('Cor do elemento')} />
+          </div>
+          {e.elementStroke(o) !== null && (
+            <Slider label="Espessura do traço" value={e.elementStroke(o)!} min={0.25} max={Math.max(10, Math.ceil(e.elementStroke(o)! * 3))} step={0.25}
+              format={(v) => v.toFixed(2).replace(/\.?0+$/, '')}
+              onChange={(v) => e.setElementStroke(o, v)} onCommit={() => e.commit('Espessura do traço')} />
+          )}
+        </Section>
+      )}
+
       {!multi && (
         <Section title="Efeitos" defaultOpen={!!o.shadow}>
           <label className="check">
@@ -361,7 +374,7 @@ function useThumbs(e: FormaEngine) {
 }
 
 const KIND_ICON: Record<LayerKind, JSX.Element> = {
-  image: <ImageIcon size={11} />, text: <Type size={11} />, shape: <Shapes size={11} />, paint: <Brush size={11} />, group: <Folder size={11} />,
+  image: <ImageIcon size={11} />, text: <Type size={11} />, shape: <Shapes size={11} />, paint: <Brush size={11} />, group: <Folder size={11} />, element: <Sparkles size={11} />,
 };
 
 export function LayersPanel({ e }: { e: FormaEngine }) {

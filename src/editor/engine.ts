@@ -15,7 +15,10 @@ import {
   Rect,
   Shadow,
   cache,
+  Color,
   config,
+  loadSVGFromString,
+  FabricText,
   filters,
   setFilterBackend,
   util,
@@ -40,14 +43,14 @@ FabricObject.ownDefaults.cornerSize = 9;
 FabricObject.ownDefaults.cornerStyle = 'circle';
 FabricObject.ownDefaults.borderScaleFactor = 1.5;
 FabricObject.ownDefaults.padding = 0;
-FabricObject.customProperties = ['id', 'name', 'locked', 'kind', 'adjust'];
+FabricObject.customProperties = ['id', 'name', 'locked', 'kind', 'adjust', 'tint'];
 
 // ───────────────────────────── tipos ─────────────────────────────
 export type ToolId =
   | 'move' | 'marquee' | 'crop' | 'eyedropper' | 'brush' | 'eraser' | 'gradient'
   | 'bucket' | 'text' | 'rect' | 'ellipse' | 'line' | 'hand' | 'zoom';
 
-export type LayerKind = 'image' | 'text' | 'shape' | 'paint' | 'group';
+export type LayerKind = 'image' | 'text' | 'shape' | 'paint' | 'group' | 'element';
 
 export type Adjust = {
   brightness: number; contrast: number; saturation: number; vibrance: number; hue: number;
@@ -800,6 +803,114 @@ export class FormaEngine {
     }
   }
 
+  // ───────── banco de elementos ─────────
+  /**
+   * Insere um SVG do banco. `currentColor` vira a cor de frente e as partes com essa cor
+   * ficam marcadas (`tint`) para poderem ser recoloridas depois no painel Propriedades.
+   */
+  async addElement(svgText: string, name: string, opts: { client?: { x: number; y: number }; gradient?: { stops: string[]; angle: number } } = {}) {
+    if (!this.hasDoc) this.newDocument({ name: 'Sem título', width: 1080, height: 1350, background: '#ffffff' });
+    if (opts.gradient) return this.addGradient(name, opts.gradient);
+    const MARK = '#fe01fe';
+    const { objects, options } = await loadSVGFromString(svgText.replace(/currentColor/g, MARK));
+    const isMark = (v: unknown) => typeof v === 'string' && v !== 'none' && new Color(v).toHex().toLowerCase() === 'fe01fe';
+    const parts = (objects.filter(Boolean) as FabricObject[]).map((o) => {
+      // texto de SVG vira texto editável
+      if (o instanceof FabricText && !(o instanceof IText)) {
+        const { type: _t, ...rest } = o.toObject() as Record<string, any>;
+        const t = new IText(o.text, rest);
+        t.set({ left: o.left, top: o.top, angle: o.angle });
+        return t as FabricObject;
+      }
+      return o;
+    });
+    parts.forEach((o) => {
+      const f = isMark(o.fill), st = isMark(o.stroke);
+      if (f) o.set('fill', this.fg);
+      if (st) o.set('stroke', this.fg);
+      if (f || st) (o as any).tint = f && st ? 'both' : f ? 'fill' : 'stroke';
+    });
+    const obj = (parts.length === 1 ? parts[0] : util.groupSVGElements(parts, options)) as Lay;
+    const target = Math.min(this.doc.width, this.doc.height) * 0.32;
+    const k = target / Math.max(obj.width || 1, obj.height || 1);
+    obj.scale(k);
+    let at = new Point(this.doc.width / 2, this.doc.height / 2);
+    if (opts.client) {
+      const r = this.canvas.upperCanvasEl.getBoundingClientRect();
+      at = util.transformPoint(new Point(opts.client.x - r.left, opts.client.y - r.top), util.invertTransform(this.canvas.viewportTransform));
+    }
+    obj.set({ left: at.x - obj.getScaledWidth() / 2, top: at.y - obj.getScaledHeight() / 2 });
+    obj.setCoords();
+    this.prep(obj, 'element', this.nextName(name));
+    this.addLayer(obj);
+    this.setTool('move');
+    this.canvas.setActiveObject(obj);
+    this.refreshAllText([obj]);
+    this.commit('Elemento');
+  }
+
+  private addGradient(name: string, g: { stops: string[]; angle: number }) {
+    const { width: w, height: h } = this.doc;
+    const a = ((g.angle - 90) * Math.PI) / 180;
+    const half = (Math.abs(Math.cos(a)) * w + Math.abs(Math.sin(a)) * h) / 2;
+    const r = new Rect({
+      left: 0, top: 0, width: w, height: h,
+      fill: new Gradient({
+        type: 'linear', gradientUnits: 'pixels',
+        coords: { x1: w / 2 - Math.cos(a) * half, y1: h / 2 - Math.sin(a) * half, x2: w / 2 + Math.cos(a) * half, y2: h / 2 + Math.sin(a) * half },
+        colorStops: g.stops.map((color, i) => ({ offset: i / (g.stops.length - 1), color })),
+      }),
+    }) as Lay;
+    this.prep(r, 'shape', name);
+    this.canvas.insertAt(1, r); // logo acima do fundo do documento
+    this.helpersToFront();
+    this.setTool('move');
+    this.canvas.setActiveObject(r);
+    this.canvas.requestRenderAll();
+    this.commit('Gradiente');
+  }
+
+  /** Partes recoloríveis de um elemento (ou o próprio objeto). */
+  tintParts(obj: FabricObject): FabricObject[] {
+    const out: FabricObject[] = [];
+    const walk = (o: FabricObject) => {
+      if (o instanceof Group) o.getObjects().forEach(walk);
+      else if ((o as any).tint) out.push(o);
+    };
+    walk(obj);
+    return out;
+  }
+
+  elementColor(obj: FabricObject) {
+    const p = this.tintParts(obj)[0] as any;
+    if (!p) return null;
+    const v = p.tint === 'stroke' ? p.stroke : p.fill;
+    return typeof v === 'string' ? '#' + new Color(v).toHex().toLowerCase() : null;
+  }
+
+  setElementColor(obj: FabricObject, color: string, commit?: string) {
+    this.tintParts(obj).forEach((o: any) => {
+      if (o.tint === 'fill' || o.tint === 'both') o.set('fill', color);
+      if (o.tint === 'stroke' || o.tint === 'both') o.set('stroke', color);
+      o.set('dirty', true);
+    });
+    obj.set('dirty', true);
+    this.canvas.requestRenderAll();
+    if (commit) this.commit(commit); else this.emit();
+  }
+
+  elementStroke(obj: FabricObject) {
+    const p = this.tintParts(obj).find((o: any) => o.tint !== 'fill');
+    return p ? p.strokeWidth : null;
+  }
+
+  setElementStroke(obj: FabricObject, w: number, commit?: string) {
+    this.tintParts(obj).forEach((o: any) => { if (o.tint !== 'fill') o.set({ strokeWidth: w, dirty: true }); });
+    obj.set('dirty', true);
+    this.canvas.requestRenderAll();
+    if (commit) this.commit(commit); else this.emit();
+  }
+
   async openFile(file: File, mode: 'open' | 'place' = 'open') {
     const lower = file.name.toLowerCase();
     if (lower.endsWith('.forma') || lower.endsWith('.json')) {
@@ -1513,5 +1624,5 @@ export class FormaEngine {
 }
 
 export function kindLabel(k: LayerKind) {
-  return { image: 'Imagem', text: 'Texto', shape: 'Forma', paint: 'Camada', group: 'Grupo' }[k];
+  return { image: 'Imagem', text: 'Texto', shape: 'Forma', paint: 'Camada', group: 'Grupo', element: 'Elemento' }[k];
 }

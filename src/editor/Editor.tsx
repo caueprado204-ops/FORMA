@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FabricImage } from 'fabric';
 import {
   ChevronDown, Command as CommandIcon, Download, FilePlus, FolderOpen, ImagePlus, Keyboard, Maximize, Minus,
-  PanelRight, Plus, Redo2, Search, Undo2, ArrowLeft, Monitor, Smartphone, Presentation, Square, FileImage, Clock, Images,
+  PanelRight, Plus, Redo2, Search, Undo2, ArrowLeft, Monitor, Smartphone, Presentation, Square, FileImage, Clock, Images, Shapes, Crown,
 } from 'lucide-react';
-import { BANK_MIME, ImageBank } from './ImageBank';
+import { Library, type LibraryTab } from './Library';
+import { BANK_MIME, ELEMENT_MIME, type Inserter } from './library-types';
+import { takeHandoff, setHandoff } from '../handoff';
 import { FontPicker } from './FontPicker';
 import { restoreCustomFonts } from './fonts';
 import { FormaEngine, type Doc, type ToolId } from './engine';
@@ -24,7 +26,8 @@ export default function Editor({ goHome }: { goHome: () => void }) {
   const [panels, setPanels] = useState(true);
   const [dropping, setDropping] = useState(false);
   // banco de imagens: abre sozinho ao voltar do login do Pinterest
-  const [bank, setBank] = useState(() => new URLSearchParams(location.search).has('pinterest'));
+  const [lib, setLib] = useState<LibraryTab | null>(() => (new URLSearchParams(location.search).has('pinterest') ? 'imagens' : null));
+  const toggleLib = (t: LibraryTab) => setLib((cur) => (cur === t ? null : t));
   useEngine(engine);
 
   useEffect(() => {
@@ -50,13 +53,21 @@ export default function Editor({ goHome }: { goHome: () => void }) {
       engine.notify('Projeto salvo');
     },
     togglePanel: () => setPanels((p) => !p),
-    toggleBank: () => setBank((b) => !b),
+    toggleBank: () => toggleLib('imagens'),
+    toggleElements: () => toggleLib('elementos'),
+    openPro: async () => {
+      if (engine?.hasDoc && engine.layers().length) {
+        const blob = await (await fetch(engine.exportDataURL('png', 1, 1))).blob();
+        setHandoff({ blob, name: engine.doc.name });
+      }
+      location.hash = '#/pro';
+    },
     goHome,
   }), [engine, goHome]);
 
   const run = useCallback((c: Command) => {
     if (!engine) return;
-    if (!engine.hasDoc && !['new', 'open', 'home', 'shortcuts', 'palette', 'panel', 'bank'].includes(c.id)) {
+    if (!engine.hasDoc && !['new', 'open', 'home', 'shortcuts', 'palette', 'panel', 'bank', 'elements', 'pro'].includes(c.id)) {
       setDialog('new');
       return;
     }
@@ -122,6 +133,13 @@ export default function Editor({ goHome }: { goHome: () => void }) {
   // abre o diálogo inicial (ou o banco, na volta do login do Pinterest)
   useEffect(() => {
     if (!engine) return;
+    const fromPro = takeHandoff();
+    if (fromPro) {
+      setDialog(null);
+      const url = URL.createObjectURL(fromPro.blob);
+      engine.openImage(url, fromPro.name || 'Do modo Pro').then(() => engine.notify('Arte trazida do modo Pro'));
+      return;
+    }
     const status = new URLSearchParams(location.search).get('pinterest');
     if (status) {
       history.replaceState(null, '', location.pathname + location.hash);
@@ -137,6 +155,14 @@ export default function Editor({ goHome }: { goHome: () => void }) {
     if (!engine.hasDoc) setDialog('new');
   }, [engine]);
 
+  const inserter: Inserter | null = useMemo(() => engine && ({
+    image: (url, name, client) => engine.placeRemote(url, name, client),
+    element: (svg, name, opts) => engine.addElement(svg, name, opts),
+    color: engine.fg,
+    setColor: (c) => engine.setColors(c),
+    canDrag: true,
+  }), [engine, engine?.fg]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const e = engine;
   const toolInfo = TOOLS.find((t) => t.id === (e?.tool || 'move'))!;
 
@@ -144,12 +170,12 @@ export default function Editor({ goHome }: { goHome: () => void }) {
     <div className={`editor ${panels ? '' : 'nopanels'}`}>
       {e && <TopBar e={e} run={run} ui={ui} />}
       {e && <OptionsBar e={e} hint={toolInfo.hint} />}
-      {e && <ToolBar e={e} bank={bank} onBank={() => setBank((b) => !b)} />}
+      {e && <ToolBar e={e} lib={lib} onLib={toggleLib} />}
       <main
         className={`stage card ${dropping ? 'dropping' : ''}`}
         onDragOver={(ev) => {
           const t = ev.dataTransfer.types;
-          if (t.includes(BANK_MIME)) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'copy'; }
+          if (t.includes(BANK_MIME) || t.includes(ELEMENT_MIME)) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'copy'; }
           else if (t.includes('Files')) { ev.preventDefault(); setDropping(true); }
         }}
         onDragLeave={() => setDropping(false)}
@@ -157,6 +183,12 @@ export default function Editor({ goHome }: { goHome: () => void }) {
           ev.preventDefault();
           if (!e) return;
           setDropping(false);
+          const el = ev.dataTransfer.getData(ELEMENT_MIME);
+          if (el) {
+            const { svg, name, gradient } = JSON.parse(el);
+            await e.addElement(svg, name, { client: { x: ev.clientX, y: ev.clientY }, gradient });
+            return;
+          }
           const fromBank = ev.dataTransfer.getData(BANK_MIME);
           if (fromBank) {
             const { url, name } = JSON.parse(fromBank);
@@ -186,7 +218,7 @@ export default function Editor({ goHome }: { goHome: () => void }) {
           </div>
         )}
         {dropping && <div className="dropzone"><ImagePlus size={28} />Solte a imagem para {e?.hasDoc ? 'colocar como camada' : 'abrir'}</div>}
-        {e && bank && <ImageBank e={e} onClose={() => setBank(false)} />}
+        {e && lib && <Library ins={inserter!} tab={lib} onTab={setLib} onClose={() => setLib(null)} />}
         {e && <Toast e={e} />}
       </main>
       {e && panels && <RightColumn e={e} />}
@@ -250,6 +282,7 @@ function TopBar({ e, run, ui }: { e: FormaEngine; run: (c: Command) => void; ui:
           <Search size={14} /><span>Buscar comando</span><kbd>{formatKeys('mod+k')}</kbd>
         </button>
         <IconBtn tip="Painéis (Tab)" onClick={() => ui.togglePanel('right')}><PanelRight size={16} /></IconBtn>
+        <button className="btn ghost sm pro-btn" onClick={() => ui.openPro()} data-tip="Abrir a arte no editor Photopea"><Crown size={14} />Modo Pro</button>
         <button className="btn lime sm" onClick={() => (e.hasDoc ? ui.dialog('export') : ui.dialog('new'))}><Download size={14} />Exportar</button>
       </div>
     </header>
@@ -300,7 +333,7 @@ function OptionsBar({ e, hint }: { e: FormaEngine; hint: string }) {
 // ───────────────────────── barra de ferramentas ─────────────────────────
 const TOOL_GROUPS: ToolId[][] = [['move', 'marquee', 'crop', 'eyedropper'], ['brush', 'eraser', 'gradient', 'bucket'], ['text', 'rect', 'ellipse', 'line'], ['hand', 'zoom']];
 
-function ToolBar({ e, bank, onBank }: { e: FormaEngine; bank: boolean; onBank: () => void }) {
+function ToolBar({ e, lib, onLib }: { e: FormaEngine; lib: LibraryTab | null; onLib: (t: LibraryTab) => void }) {
   return (
     <aside className="toolbar card">
       {TOOL_GROUPS.map((g, gi) => (
@@ -317,8 +350,11 @@ function ToolBar({ e, bank, onBank }: { e: FormaEngine; bank: boolean; onBank: (
         </div>
       ))}
       <div className="toolgroup">
-        <button className={`tool ${bank ? 'on' : ''}`} data-tip="Banco de imagens" data-tip-side="right" aria-label="Banco de imagens" onClick={onBank}>
+        <button className={`tool ${lib === 'imagens' ? 'on' : ''}`} data-tip="Banco de imagens" data-tip-side="right" aria-label="Banco de imagens" onClick={() => onLib('imagens')}>
           <Images size={18} strokeWidth={1.6} />
+        </button>
+        <button className={`tool ${lib === 'elementos' ? 'on' : ''}`} data-tip="Elementos" data-tip-side="right" aria-label="Elementos" onClick={() => onLib('elementos')}>
+          <Shapes size={18} strokeWidth={1.6} />
         </button>
       </div>
       <div className="toolcolors">

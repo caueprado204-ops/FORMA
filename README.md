@@ -13,7 +13,10 @@ Editor de imagens no navegador, no estilo Photoshop, com interface própria da F
 - **Exportação** PNG/JPG/WEBP em 0.5x–3x; projeto salvo como `.forma`; salvamento automático no navegador
 - **Mais de 370 fontes** do Google Fonts, carregadas só quando usadas: busca, categorias (sem serifa, serifa, display, manuscrita, mono), recentes e prévia ao passar o mouse. Também dá para **enviar fontes próprias** (.ttf, .otf, .woff, .woff2), que ficam salvas no navegador
 - **Atalhos** no padrão Photoshop e paleta de comandos (`Ctrl+K`)
-- **Banco de imagens** (`Ctrl+Shift+O`, ou o ícone de imagens na barra de ferramentas):
+- **Biblioteca** com duas abas, aberta pelos ícones na barra de ferramentas:
+- **Banco de elementos** (`Ctrl+Shift+K`): formas, linhas e setas, mais de 2.000 ícones (Lucide), adesivos com texto, molduras e mockups, enfeites e gradientes. Busca em português, escolha de cor antes de inserir e, depois, cor e espessura do traço no painel Propriedades
+- **Modo Pro** (`#/pro`): o editor Photopea embutido, com a mesma biblioteca ao lado. O botão **Modo Pro** leva a arte atual para lá; **Levar para o editor Forma** traz o resultado de volta; **Baixar PNG** exporta direto. O Photopea é gratuito e exibe anúncios; para removê-los é preciso uma conta de distribuidor no Photopea
+- **Banco de imagens** (`Ctrl+Shift+O`):
   - **Pinterest**: suas pastas, seus pins recentes e busca nos seus pins, depois de conectar a conta
   - **Link de pin**: cole qualquer link `pinterest.com/pin/…` ou `pin.it/…`; funciona sem login
   - **Banco livre**: fotos Creative Commons do Flickr e da Wikimedia (via Openverse) que permitem edição e uso comercial; o autor e a licença vão no nome da camada
@@ -55,15 +58,21 @@ O login fica em cookies `HttpOnly` no navegador de cada pessoa; o token nunca ch
 api/                       # funções da Vercel
 ├── pinterest/             # login, callback, me, logout, boards, pins, pin (link)
 ├── stock.ts               # banco livre (Openverse)
-├── img.ts                 # proxy de imagens (só hosts permitidos) para o canvas poder exportar
+├── img.ts                 # proxy de imagens (só hosts permitidos) para o canvas e o modo Pro
+├── svg.ts                 # entrega elementos (SVG) por URL para o modo Pro, sem scripts
 └── _lib/                  # código compartilhado (não vira rota)
 src/
 ├── landing/Landing.tsx    # landing page
+├── pro/ProEditor.tsx      # modo Pro (Photopea embutido)
 ├── editor/
 │   ├── engine.ts          # motor sobre o Fabric.js: camadas, ferramentas, histórico, exportação
 │   ├── commands.ts        # menus, atalhos e paleta de comandos (uma lista só)
 │   ├── lut.ts             # filtros próprios: LUT 3D, vinheta, temperatura
-│   ├── ImageBank.tsx      # gaveta do banco de imagens
+│   ├── Library.tsx        # biblioteca (abas Imagens e Elementos)
+│   ├── ImageBank.tsx      # aba Imagens: Pinterest e banco livre
+│   ├── ElementsPanel.tsx  # aba Elementos
+│   ├── elements.ts        # catálogo de formas, linhas, adesivos, molduras, enfeites, gradientes
+│   ├── icons.ts           # ícones Lucide + busca em português (carregado sob demanda)
 │   ├── fonts.ts           # catálogo de fontes e carregamento sob demanda
 │   ├── FontPicker.tsx     # seletor de fontes
 │   ├── panels.tsx         # Propriedades, Ajustes, Cor, Camadas, Histórico
@@ -76,6 +85,8 @@ src/
 ## Créditos
 
 - [Fabric.js](https://fabricjs.com) — motor de canvas (MIT)
+- [Lucide](https://lucide.dev) — ícones do banco de elementos (ISC)
+- [Photopea](https://www.photopea.com/api/) — editor do modo Pro, embutido pela API pública
 - [PhotoSplice](https://github.com/eolix/PhotoSplice) / [PhotoCraft](https://github.com/storytold/photocraft) (MIT/Apache-2.0) — de onde vêm:
   - ícones das ferramentas: [Tabler Icons](https://tabler.io/icons), MIT (`src/assets/tools/LICENSE-tabler.txt`)
   - LUTs de cor: [Fresh LUTs](https://freshluts.com), CC0, reamostrados para 17×17×17

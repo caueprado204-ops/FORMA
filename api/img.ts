@@ -17,6 +17,11 @@ export async function GET(req: Request) {
   const body = await r.arrayBuffer();
   if (body.byteLength > MAX) return fail('Imagem grande demais', 413);
   return new Response(body, {
-    headers: { 'content-type': type, 'cache-control': 'public, max-age=86400, s-maxage=604800, immutable' },
+    headers: {
+      'content-type': type,
+      'cache-control': 'public, max-age=86400, s-maxage=604800, immutable',
+      // o modo Pro (Photopea, em outro domínio) baixa as imagens por aqui
+      'access-control-allow-origin': '*',
+    },
   });
 }

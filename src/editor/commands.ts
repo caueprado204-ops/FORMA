@@ -29,6 +29,8 @@ export type UiApi = {
   saveProject: () => void;
   togglePanel: (p: 'right') => void;
   toggleBank: () => void;
+  toggleElements: () => void;
+  openPro: () => void;
   goHome: () => void;
 };
 
@@ -55,6 +57,8 @@ export const COMMANDS: Command[] = [
   { id: 'open', label: 'Abrir…', menu: 'arquivo', keys: 'mod+o', run: (_, ui) => ui.open('open') },
   { id: 'place', label: 'Colocar imagem…', menu: 'arquivo', keys: 'mod+shift+p', run: (_, ui) => ui.open('place') },
   { id: 'bank', label: 'Banco de imagens (Pinterest)', menu: 'arquivo', keys: 'mod+shift+o', run: (_, ui) => ui.toggleBank() },
+  { id: 'elements', label: 'Banco de elementos', menu: 'arquivo', keys: 'mod+shift+k', run: (_, ui) => ui.toggleElements() },
+  { id: 'pro', label: 'Abrir no modo Pro (Photopea)', menu: 'arquivo', run: (_, ui) => ui.openPro() },
   { id: 'save', label: 'Salvar projeto (.forma)', menu: 'arquivo', keys: 'mod+s', sepBefore: true, run: (_, ui) => ui.saveProject() },
   { id: 'export', label: 'Exportar como…', menu: 'arquivo', keys: 'mod+alt+shift+s', run: (_, ui) => ui.dialog('export') },
   { id: 'home', label: 'Voltar ao site', menu: 'arquivo', sepBefore: true, run: (_, ui) => ui.goHome() },

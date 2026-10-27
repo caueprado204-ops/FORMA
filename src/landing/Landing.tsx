@@ -1,4 +1,4 @@
-import { ArrowRight, Brush, Download, Images, Keyboard, Layers, MousePointer2, Pin, ShieldCheck, Sparkles, Type, Wand2, Zap } from 'lucide-react';
+import { ArrowRight, Brush, Crown, Download, Heart, House, Images, Keyboard, Layers, MousePointer2, Pin, Shapes, ShieldCheck, Sparkles, Star, Type, Wand2, Zap } from 'lucide-react';
 import { Logo } from '../Logo';
 import { ToolIcon } from '../editor/ui';
 
@@ -120,7 +120,7 @@ export default function Landing() {
         <div className="stats">
           <div><b>14</b><span>ferramentas profissionais</span></div>
           <div><b>18</b><span>looks de cinema (LUTs)</span></div>
-          <div><b>16</b><span>modos de mesclagem</span></div>
+          <div><b>2.000+</b><span>ícones e elementos</span></div>
           <div><b>60+</b><span>atalhos de teclado</span></div>
         </div>
       </header>
@@ -194,6 +194,23 @@ export default function Landing() {
               <span className="bank-tags"><span><Pin size={12} />Suas pastas</span><span><Images size={12} />Fotos livres CC</span></span>
             </div>
           </article>
+          <article className="tile t-f">
+            <div className="el-vis" aria-hidden="true">
+              <span style={{ background: '#7c5cff' }} /><span className="r" style={{ background: '#d4ff3a' }} /><span className="t" />
+              <i><Star size={22} /></i><i><Heart size={22} /></i><i><House size={22} /></i>
+              <b>NOVO</b>
+            </div>
+            <span className="ico" style={{ position: 'absolute', right: 26, top: 26 }}><Shapes size={20} /></span>
+            <h3>Banco de elementos</h3>
+            <p>Formas, linhas e setas, mais de 2.000 ícones, adesivos, molduras, enfeites e gradientes. Escolha a cor antes ou depois de colocar.</p>
+          </article>
+          <article className="tile t-g pro-tile">
+            <span className="ico" style={{ position: 'absolute', right: 26, top: 26 }}><Crown size={20} /></span>
+            <span className="pro-pill">Modo Pro</span>
+            <h3>Precisa de mais? Abra no Photopea</h3>
+            <p>Com um clique, a arte vai para o Photopea embutido, com PSD, máscaras e filtros avançados. A biblioteca do Forma continua do lado, e depois você traz o resultado de volta.</p>
+            <a className="btn ghost sm" href="#/pro" style={{ alignSelf: 'flex-start', marginTop: 14 }}><Crown size={14} />Abrir o modo Pro</a>
+          </article>
         </div>
       </section>
 
@@ -250,6 +267,7 @@ export default function Landing() {
           <div className="footer-credits">
             Motor de canvas: <a href="https://fabricjs.com" target="_blank" rel="noreferrer">Fabric.js</a> (MIT)<br />
             Ícones de ferramentas e LUTs: <a href="https://github.com/eolix/PhotoSplice" target="_blank" rel="noreferrer">PhotoSplice</a> / PhotoCraft (MIT · Tabler · CC0)<br />
+            Ícones dos elementos: <a href="https://lucide.dev" target="_blank" rel="noreferrer">Lucide</a> (ISC) · Modo Pro: <a href="https://www.photopea.com" target="_blank" rel="noreferrer">Photopea</a><br />
             <a href="/privacidade.html">Política de Privacidade</a> · © {new Date().getFullYear()} Forma
           </div>
         </div>
