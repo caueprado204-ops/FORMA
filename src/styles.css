@@ -623,3 +623,28 @@ a.btn { text-decoration: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spin, .bank { animation: none; } }
 .bank-body > * { flex-shrink: 0; }
+
+/* ───────────────────────── Seletor de fontes ───────────────────────── */
+.fp-btn { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; height: 30px; padding: 0 10px; min-width: 0;
+  background: var(--card-2); border: 1px solid var(--line); border-radius: 8px; font-size: 13.5px; color: var(--text); text-align: left; }
+.fp-btn:hover { border-color: var(--line-2); }
+.fp-btn[aria-expanded='true'] { border-color: var(--violet); }
+.fp-btn svg { color: var(--muted); flex: none; }
+.fp-pop { position: fixed; z-index: 120; width: 300px; display: flex; flex-direction: column; background: rgba(22,22,32,.98);
+  backdrop-filter: blur(18px); border: 1px solid var(--line-2); border-radius: 14px; box-shadow: 0 28px 70px -14px rgba(0,0,0,.85); animation: pop .12s ease; overflow: hidden; }
+.fp-search { display: flex; align-items: center; gap: 8px; padding: 10px 10px 8px 12px; color: var(--muted); }
+.fp-search input { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 13.5px; color: var(--text); }
+.fp-cats { display: flex; gap: 5px; padding: 0 10px 8px; overflow-x: auto; scrollbar-width: none; flex: none; }
+.fp-cats .chip { flex: none; padding: 4px 9px; font-size: 11.5px; }
+.fp-list { flex: 1; min-height: 0; overflow-y: auto; padding: 4px; border-top: 1px solid var(--line); scrollbar-width: thin; scrollbar-color: #2a2a38 transparent; }
+.fp-row { width: 100%; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 10px; border-radius: 8px; text-align: left; color: var(--text-2); }
+.fp-row.on { background: rgba(255,255,255,.06); color: var(--text); }
+.fp-row.sel { color: var(--text); }
+.fp-name { flex: 1; min-width: 0; font-size: 18px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-check { color: var(--lime); flex: none; }
+.fp-del { display: none; color: var(--muted); padding: 4px; border-radius: 6px; }
+.fp-row:hover .fp-del { display: inline-flex; }
+.fp-del:hover { color: #ff8fb0; background: rgba(255,255,255,.06); }
+.fp-empty { padding: 24px 16px; text-align: center; color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+.fp-foot { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-top: 1px solid var(--line); background: var(--card-2); flex: none; }
+.fp-foot .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

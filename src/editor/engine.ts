@@ -23,6 +23,7 @@ import {
   type TPointerEvent,
 } from 'fabric';
 import { LutFilter, TemperatureFilter, VignetteFilter } from './lut';
+import { ensureFont } from './fonts';
 
 // ───────────────────────────── configuração global do Fabric ─────────────────────────────
 // Backend 2D: permite filtros próprios (LUT, vinheta, temperatura) e evita limite de textura WebGL.
@@ -836,6 +837,7 @@ export class FormaEngine {
     this.artboard.set({ width: this.doc.width, height: this.doc.height, fill: this.doc.background || checker() });
     const objs = (await util.enlivenObjects(entry.objects)) as Lay[];
     objs.forEach((o) => { this.applyLock(o); this.canvas.add(o); });
+    this.refreshAllText(objs);
     this.helpersToFront();
     const again = objs.filter((o) => activeIds.has(o.id));
     if (again.length === 1) this.canvas.setActiveObject(again[0]);
@@ -1037,18 +1039,35 @@ export class FormaEngine {
     obj.set(props);
     obj.setCoords();
     if (obj instanceof IText && ('fontFamily' in props || 'fontWeight' in props)) {
-      const fam = obj.fontFamily;
-      document.fonts?.load(`${obj.fontWeight} 48px "${fam}"`).then(() => {
-        cache.clearFontCache(fam);
-        obj.initDimensions();
-        obj.setCoords();
-        obj.set('dirty', true);
-        this.canvas.requestRenderAll();
-      });
+      this.refreshText(obj);
     }
     this.canvas.requestRenderAll();
     if (label) this.commit(label);
     else this.emit();
+  }
+
+  /** Carrega a fonte do texto (Google Fonts / enviada) e recalcula as medidas quando ela chega. */
+  refreshText(obj: IText) {
+    const fam = obj.fontFamily;
+    return ensureFont(fam, obj.fontWeight as any, obj.fontStyle).then(() => {
+      if (obj.fontFamily !== fam) return;
+      cache.clearFontCache(fam);
+      obj.initDimensions();
+      obj.setCoords();
+      obj.set('dirty', true);
+      if (obj.group) obj.group.set('dirty', true);
+      this.canvas.requestRenderAll();
+      this.emit();
+    });
+  }
+
+  /** Todas as fontes usadas no documento, inclusive dentro de grupos. */
+  private refreshAllText(objs: FabricObject[]) {
+    const walk = (o: FabricObject): void => {
+      if (o instanceof IText) this.refreshText(o);
+      else if (o instanceof Group) o.getObjects().forEach(walk);
+    };
+    objs.forEach(walk);
   }
 
   setAdjust(target: Lay, patch: Partial<Adjust>, label?: string) {
@@ -1338,6 +1357,7 @@ export class FormaEngine {
           cursorColor: '#7c5cff', selectionColor: 'rgba(124,92,255,0.3)',
         }) as IText & Lay;
         it.set({ top: p.y - it.height / 2 });
+        this.refreshText(it);
         this.prep(it, 'text', 'Texto');
         this.addLayer(it);
         this.setTool('move');

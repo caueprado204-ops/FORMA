@@ -5,6 +5,8 @@ import {
   PanelRight, Plus, Redo2, Search, Undo2, ArrowLeft, Monitor, Smartphone, Presentation, Square, FileImage, Clock, Images,
 } from 'lucide-react';
 import { BANK_MIME, ImageBank } from './ImageBank';
+import { FontPicker } from './FontPicker';
+import { restoreCustomFonts } from './fonts';
 import { FormaEngine, type Doc, type ToolId } from './engine';
 import { COMMANDS, MENUS, TOOLS, eventCombo, formatKeys, type Command, type MenuId, type UiApi } from './commands';
 import { IconBtn, Modal, NumField, Select, Slider, ToolIcon, useEngine } from './ui';
@@ -32,6 +34,7 @@ export default function Editor({ goHome }: { goHome: () => void }) {
     host.appendChild(el);
     const e = new FormaEngine(el, host);
     setEngine(e);
+    restoreCustomFonts();
     (window as any).forma = e;
     if (window.innerWidth < 900) setPanels(false);
     return () => { e.destroy(); host.innerHTML = ''; };
@@ -278,7 +281,7 @@ function OptionsBar({ e, hint }: { e: FormaEngine; hint: string }) {
       {t === 'line' && <NumField label="Espessura" value={e.shape.strokeWidth} min={1} width={110} onCommit={(v) => { e.shape.strokeWidth = v; e.emit(); }} />}
       {t === 'text' && (
         <>
-          <Select value={e.text.font} width={150} options={['Inter', 'Space Grotesk', 'Montserrat', 'Poppins', 'Playfair Display', 'DM Serif Display', 'Bebas Neue', 'Caveat', 'JetBrains Mono', 'Georgia', 'Arial', 'Impact'].map((f) => ({ id: f, label: f }))} onChange={(v) => { e.text.font = v; e.emit(); }} />
+          <FontPicker value={e.text.font} width={170} onChange={(v) => { e.text.font = v; e.emit(); }} />
           <Select value={e.text.weight} width={110} options={[{ id: '400', label: 'Regular' }, { id: '600', label: 'Semibold' }, { id: '700', label: 'Bold' }, { id: '800', label: 'Extrabold' }]} onChange={(v) => { e.text.weight = v; e.emit(); }} />
           <NumField label="T" value={e.text.size} min={4} width={90} suffix="px" onCommit={(v) => { e.text.size = v; e.emit(); }} />
         </>

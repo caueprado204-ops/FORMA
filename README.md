@@ -11,6 +11,7 @@ Editor de imagens no navegador, no estilo Photoshop, com interface própria da F
 - **Seleção retangular**: copiar para nova camada, apagar a área, preencher, cortar
 - **Histórico** com desfazer/refazer e painel de estados
 - **Exportação** PNG/JPG/WEBP em 0.5x–3x; projeto salvo como `.forma`; salvamento automático no navegador
+- **Mais de 370 fontes** do Google Fonts, carregadas só quando usadas: busca, categorias (sem serifa, serifa, display, manuscrita, mono), recentes e prévia ao passar o mouse. Também dá para **enviar fontes próprias** (.ttf, .otf, .woff, .woff2), que ficam salvas no navegador
 - **Atalhos** no padrão Photoshop e paleta de comandos (`Ctrl+K`)
 - **Banco de imagens** (`Ctrl+Shift+O`, ou o ícone de imagens na barra de ferramentas):
   - **Pinterest**: suas pastas, seus pins recentes e busca nos seus pins, depois de conectar a conta
@@ -63,6 +64,8 @@ src/
 │   ├── commands.ts        # menus, atalhos e paleta de comandos (uma lista só)
 │   ├── lut.ts             # filtros próprios: LUT 3D, vinheta, temperatura
 │   ├── ImageBank.tsx      # gaveta do banco de imagens
+│   ├── fonts.ts           # catálogo de fontes e carregamento sob demanda
+│   ├── FontPicker.tsx     # seletor de fontes
 │   ├── panels.tsx         # Propriedades, Ajustes, Cor, Camadas, Histórico
 │   ├── Editor.tsx         # layout, barras, diálogos
 │   └── ui.tsx             # controles (sliders, campos, seletor de cor)

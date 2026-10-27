@@ -158,7 +158,7 @@ export default function Landing() {
           <article className="tile t-d">
             <div className="type-vis">Aa<span>Tipografia</span></div>
             <h3>Texto editável</h3>
-            <p>14 fontes, peso, entrelinha, espaçamento, sombra e alinhamento.</p>
+            <p>Mais de 370 fontes do Google Fonts com busca e prévia, ou envie a sua. Peso, entrelinha, espaçamento e sombra.</p>
           </article>
           <article className="tile t-e">
             <div className="adj-vis">

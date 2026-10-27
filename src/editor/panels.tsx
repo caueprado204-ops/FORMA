@@ -9,6 +9,7 @@ import {
 import { BLEND_MODES, DEFAULT_ADJUST, type Adjust, type FormaEngine, type LayerKind } from './engine';
 import { LUTS } from '../data/luts';
 import { applyLut, lutBytes } from './lut';
+import { FontPicker } from './FontPicker';
 import { ColorPicker, IconBtn, NumField, SWATCHES, Section, Select, Slider, normHex } from './ui';
 
 // ───────────────────────── campo de cor com popover ─────────────────────────
@@ -77,10 +78,10 @@ export function ColorPanel({ e }: { e: FormaEngine }) {
 }
 
 // ───────────────────────── Propriedades ─────────────────────────
-const FONTS = ['Inter', 'Space Grotesk', 'JetBrains Mono', 'Montserrat', 'Poppins', 'Playfair Display', 'DM Serif Display', 'Bebas Neue', 'Caveat', 'Georgia', 'Arial', 'Times New Roman', 'Courier New', 'Impact'];
 const WEIGHTS = [{ id: '300', label: 'Light' }, { id: '400', label: 'Regular' }, { id: '500', label: 'Medium' }, { id: '600', label: 'Semibold' }, { id: '700', label: 'Bold' }, { id: '800', label: 'Extrabold' }];
 
 export function PropertiesPanel({ e }: { e: FormaEngine }) {
+  const fontBefore = useRef<string | null>(null); // fonte original enquanto o usuário só passa o mouse na lista
   const o = e.canvas.getActiveObject() as (FabricObject & { kind?: LayerKind; name?: string }) | undefined;
   if (!o || (o as any).isHelper) return <DocProps e={e} />;
   const br = o.getBoundingRect();
@@ -118,7 +119,12 @@ export function PropertiesPanel({ e }: { e: FormaEngine }) {
 
       {isText && (
         <Section title="Texto">
-          <Select value={(o as IText).fontFamily} width="100%" options={FONTS.map((f) => ({ id: f, label: f }))} onChange={(v) => e.update(o, { fontFamily: v }, 'Fonte')} />
+          <FontPicker value={(o as IText).fontFamily} width="100%"
+            onChange={(v) => { fontBefore.current = null; e.update(o, { fontFamily: v }, 'Fonte'); }}
+            onPreview={(v) => {
+              if (v) { if (fontBefore.current === null) fontBefore.current = (o as IText).fontFamily; e.update(o, { fontFamily: v }); }
+              else if (fontBefore.current !== null) { e.update(o, { fontFamily: fontBefore.current }); fontBefore.current = null; }
+            }} />
           <div className="grid2" style={{ marginTop: 8 }}>
             <Select value={String((o as IText).fontWeight)} options={WEIGHTS} onChange={(v) => e.update(o, { fontWeight: v }, 'Peso da fonte')} />
             <NumField label="T" value={(o as IText).fontSize} min={1} suffix="px" onCommit={(v) => e.update(o, { fontSize: v }, 'Tamanho da fonte')} />
