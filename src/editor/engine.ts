@@ -782,6 +782,23 @@ export class FormaEngine {
     this.commit('Colocar imagem');
   }
 
+  /** Coloca uma imagem do banco (Pinterest ou livre). `client` = ponto da tela onde foi solto. */
+  async placeRemote(url: string, name: string, client?: { x: number; y: number }) {
+    const src = `/api/img?u=${encodeURIComponent(url)}`;
+    let at: Point | undefined;
+    if (client && this.hasDoc) {
+      const r = this.canvas.upperCanvasEl.getBoundingClientRect();
+      at = util.transformPoint(new Point(client.x - r.left, client.y - r.top), util.invertTransform(this.canvas.viewportTransform));
+    }
+    this.notify('Baixando imagem…');
+    try {
+      await this.placeImage(src, name.slice(0, 60), at);
+      this.notify('Imagem adicionada como camada');
+    } catch {
+      this.notify('Não foi possível baixar essa imagem');
+    }
+  }
+
   async openFile(file: File, mode: 'open' | 'place' = 'open') {
     const lower = file.name.toLowerCase();
     if (lower.endsWith('.forma') || lower.endsWith('.json')) {

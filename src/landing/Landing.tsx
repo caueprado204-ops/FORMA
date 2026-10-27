@@ -1,4 +1,4 @@
-import { ArrowRight, Brush, Download, Keyboard, Layers, MousePointer2, ShieldCheck, Sparkles, Type, Wand2, Zap } from 'lucide-react';
+import { ArrowRight, Brush, Download, Images, Keyboard, Layers, MousePointer2, Pin, ShieldCheck, Sparkles, Type, Wand2, Zap } from 'lucide-react';
 import { Logo } from '../Logo';
 import { ToolIcon } from '../editor/ui';
 
@@ -179,7 +179,20 @@ export default function Landing() {
             <div className="priv-vis"><span className="pulse" />Salvo automaticamente neste navegador</div>
             <span className="ico" style={{ position: 'absolute', right: 26, top: 26 }}><ShieldCheck size={20} /></span>
             <h3>Privado por padrão</h3>
-            <p>Nada é enviado para servidor: suas imagens são processadas no seu dispositivo, e o trabalho fica salvo localmente mesmo se a aba fechar.</p>
+            <p>Suas fotos nunca são enviadas para servidor: tudo é processado no seu dispositivo, e o trabalho fica salvo localmente mesmo se a aba fechar.</p>
+          </article>
+          <article className="tile t-h">
+            <div className="bank-vis" aria-hidden="true">
+              {['#7c5cff,#ff5c9a', '#1d3b4a,#e8a25e', '#d4ff3a,#3ddc97', '#2a1b6b,#ff9a6b', '#0f2a2e,#59c2b5', '#ff9f43,#ffd84d', '#3b5bff,#a259ff', '#2b1b1b,#ff8a65'].map((g, i) => (
+                <b key={i} style={{ background: `linear-gradient(160deg,${g.split(',')[0]},${g.split(',')[1]})`, height: [120, 80, 150, 96, 136, 88, 110, 140][i] }} />
+              ))}
+            </div>
+            <div className="bank-copy">
+              <span className="ico"><Pin size={20} /></span>
+              <h3>Banco de imagens ligado ao Pinterest</h3>
+              <p>Conecte sua conta e navegue pelas suas pastas sem sair do editor. Cole o link de qualquer pin, ou busque fotos livres para uso comercial. Clique ou arraste para a tela e a imagem vira camada.</p>
+              <span className="bank-tags"><span><Pin size={12} />Suas pastas</span><span><Images size={12} />Fotos livres CC</span></span>
+            </div>
           </article>
         </div>
       </section>

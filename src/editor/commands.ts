@@ -28,6 +28,7 @@ export type UiApi = {
   dialog: (d: 'new' | 'export' | 'size' | 'shortcuts' | 'palette' | null) => void;
   saveProject: () => void;
   togglePanel: (p: 'right') => void;
+  toggleBank: () => void;
   goHome: () => void;
 };
 
@@ -53,6 +54,7 @@ export const COMMANDS: Command[] = [
   { id: 'new', label: 'Novo…', menu: 'arquivo', keys: 'mod+n', run: (_, ui) => ui.dialog('new') },
   { id: 'open', label: 'Abrir…', menu: 'arquivo', keys: 'mod+o', run: (_, ui) => ui.open('open') },
   { id: 'place', label: 'Colocar imagem…', menu: 'arquivo', keys: 'mod+shift+p', run: (_, ui) => ui.open('place') },
+  { id: 'bank', label: 'Banco de imagens (Pinterest)', menu: 'arquivo', keys: 'mod+shift+o', run: (_, ui) => ui.toggleBank() },
   { id: 'save', label: 'Salvar projeto (.forma)', menu: 'arquivo', keys: 'mod+s', sepBefore: true, run: (_, ui) => ui.saveProject() },
   { id: 'export', label: 'Exportar como…', menu: 'arquivo', keys: 'mod+alt+shift+s', run: (_, ui) => ui.dialog('export') },
   { id: 'home', label: 'Voltar ao site', menu: 'arquivo', sepBefore: true, run: (_, ui) => ui.goHome() },

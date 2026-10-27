@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FabricImage } from 'fabric';
 import {
   ChevronDown, Command as CommandIcon, Download, FilePlus, FolderOpen, ImagePlus, Keyboard, Maximize, Minus,
-  PanelRight, Plus, Redo2, Search, Undo2, ArrowLeft, Monitor, Smartphone, Presentation, Square, FileImage, Clock,
+  PanelRight, Plus, Redo2, Search, Undo2, ArrowLeft, Monitor, Smartphone, Presentation, Square, FileImage, Clock, Images,
 } from 'lucide-react';
+import { BANK_MIME, ImageBank } from './ImageBank';
 import { FormaEngine, type Doc, type ToolId } from './engine';
 import { COMMANDS, MENUS, TOOLS, eventCombo, formatKeys, type Command, type MenuId, type UiApi } from './commands';
 import { IconBtn, Modal, NumField, Select, Slider, ToolIcon, useEngine } from './ui';
@@ -20,6 +21,8 @@ export default function Editor({ goHome }: { goHome: () => void }) {
   const [dialog, setDialog] = useState<DialogId>(null);
   const [panels, setPanels] = useState(true);
   const [dropping, setDropping] = useState(false);
+  // banco de imagens: abre sozinho ao voltar do login do Pinterest
+  const [bank, setBank] = useState(() => new URLSearchParams(location.search).has('pinterest'));
   useEngine(engine);
 
   useEffect(() => {
@@ -44,12 +47,13 @@ export default function Editor({ goHome }: { goHome: () => void }) {
       engine.notify('Projeto salvo');
     },
     togglePanel: () => setPanels((p) => !p),
+    toggleBank: () => setBank((b) => !b),
     goHome,
   }), [engine, goHome]);
 
   const run = useCallback((c: Command) => {
     if (!engine) return;
-    if (!engine.hasDoc && !['new', 'open', 'home', 'shortcuts', 'palette', 'panel'].includes(c.id)) {
+    if (!engine.hasDoc && !['new', 'open', 'home', 'shortcuts', 'palette', 'panel', 'bank'].includes(c.id)) {
       setDialog('new');
       return;
     }
@@ -112,8 +116,23 @@ export default function Editor({ goHome }: { goHome: () => void }) {
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('paste', paste); };
   }, [engine, dialog, run]);
 
-  // abre o diálogo inicial
-  useEffect(() => { if (engine && !engine.hasDoc) setDialog('new'); }, [engine]);
+  // abre o diálogo inicial (ou o banco, na volta do login do Pinterest)
+  useEffect(() => {
+    if (!engine) return;
+    const status = new URLSearchParams(location.search).get('pinterest');
+    if (status) {
+      history.replaceState(null, '', location.pathname + location.hash);
+      const msg: Record<string, string> = { conectado: 'Pinterest conectado', cancelado: 'Conexão com o Pinterest cancelada', erro: 'Não foi possível conectar o Pinterest' };
+      if (!engine.hasDoc) {
+        const saved = FormaEngine.savedProject();
+        if (saved?.objects?.length) engine.loadProject(saved);
+        else engine.newDocument({ name: 'Sem título', width: 1080, height: 1350, background: '#ffffff' });
+      }
+      engine.notify(msg[status] || msg.erro);
+      return;
+    }
+    if (!engine.hasDoc) setDialog('new');
+  }, [engine]);
 
   const e = engine;
   const toolInfo = TOOLS.find((t) => t.id === (e?.tool || 'move'))!;
@@ -122,15 +141,25 @@ export default function Editor({ goHome }: { goHome: () => void }) {
     <div className={`editor ${panels ? '' : 'nopanels'}`}>
       {e && <TopBar e={e} run={run} ui={ui} />}
       {e && <OptionsBar e={e} hint={toolInfo.hint} />}
-      {e && <ToolBar e={e} />}
+      {e && <ToolBar e={e} bank={bank} onBank={() => setBank((b) => !b)} />}
       <main
         className={`stage card ${dropping ? 'dropping' : ''}`}
-        onDragOver={(ev) => { if (ev.dataTransfer.types.includes('Files')) { ev.preventDefault(); setDropping(true); } }}
+        onDragOver={(ev) => {
+          const t = ev.dataTransfer.types;
+          if (t.includes(BANK_MIME)) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'copy'; }
+          else if (t.includes('Files')) { ev.preventDefault(); setDropping(true); }
+        }}
         onDragLeave={() => setDropping(false)}
         onDrop={async (ev) => {
           ev.preventDefault();
           if (!e) return;
           setDropping(false);
+          const fromBank = ev.dataTransfer.getData(BANK_MIME);
+          if (fromBank) {
+            const { url, name } = JSON.parse(fromBank);
+            await e.placeRemote(url, name, { x: ev.clientX, y: ev.clientY });
+            return;
+          }
           const files = Array.from(ev.dataTransfer.files);
           for (const f of files) await e.openFile(f, e.hasDoc ? 'place' : 'open');
           if (files.length) setDialog(null);
@@ -154,6 +183,7 @@ export default function Editor({ goHome }: { goHome: () => void }) {
           </div>
         )}
         {dropping && <div className="dropzone"><ImagePlus size={28} />Solte a imagem para {e?.hasDoc ? 'colocar como camada' : 'abrir'}</div>}
+        {e && bank && <ImageBank e={e} onClose={() => setBank(false)} />}
         {e && <Toast e={e} />}
       </main>
       {e && panels && <RightColumn e={e} />}
@@ -267,7 +297,7 @@ function OptionsBar({ e, hint }: { e: FormaEngine; hint: string }) {
 // ───────────────────────── barra de ferramentas ─────────────────────────
 const TOOL_GROUPS: ToolId[][] = [['move', 'marquee', 'crop', 'eyedropper'], ['brush', 'eraser', 'gradient', 'bucket'], ['text', 'rect', 'ellipse', 'line'], ['hand', 'zoom']];
 
-function ToolBar({ e }: { e: FormaEngine }) {
+function ToolBar({ e, bank, onBank }: { e: FormaEngine; bank: boolean; onBank: () => void }) {
   return (
     <aside className="toolbar card">
       {TOOL_GROUPS.map((g, gi) => (
@@ -283,6 +313,11 @@ function ToolBar({ e }: { e: FormaEngine }) {
           })}
         </div>
       ))}
+      <div className="toolgroup">
+        <button className={`tool ${bank ? 'on' : ''}`} data-tip="Banco de imagens" data-tip-side="right" aria-label="Banco de imagens" onClick={onBank}>
+          <Images size={18} strokeWidth={1.6} />
+        </button>
+      </div>
       <div className="toolcolors">
         <button className="tc-bg" style={{ background: e.bg }} onClick={() => e.swapColors()} aria-label="Cor de fundo" data-tip="Fundo — X troca" data-tip-side="right" />
         <button className="tc-fg" style={{ background: e.fg }} aria-label="Cor de frente" data-tip="Frente" data-tip-side="right">
