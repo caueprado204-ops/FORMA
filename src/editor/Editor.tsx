@@ -8,6 +8,7 @@ import { Library, type LibraryTab } from './Library';
 import { BANK_MIME, ELEMENT_MIME, type Inserter } from './library-types';
 import { takeHandoff, setHandoff } from '../handoff';
 import { FontPicker } from './FontPicker';
+import { AppsLauncher } from '../apps/AppsHub';
 import { restoreCustomFonts } from './fonts';
 import { FormaEngine, type Doc, type ToolId } from './engine';
 import { COMMANDS, MENUS, TOOLS, eventCombo, formatKeys, type Command, type MenuId, type UiApi } from './commands';
@@ -278,6 +279,7 @@ function TopBar({ e, run, ui }: { e: FormaEngine; run: (c: Command) => void; ui:
       <div className="topbar-right">
         <IconBtn tip="Desfazer (Ctrl+Z)" onClick={() => e.undo()} disabled={e.historyIndex <= 0}><Undo2 size={16} /></IconBtn>
         <IconBtn tip="Refazer (Ctrl+Shift+Z)" onClick={() => e.redo()} disabled={e.historyIndex >= e.history.length - 1}><Redo2 size={16} /></IconBtn>
+        <AppsLauncher />
         <button className="palette-btn" onClick={() => ui.dialog('palette')}>
           <Search size={14} /><span>Buscar comando</span><kbd>{formatKeys('mod+k')}</kbd>
         </button>

@@ -1,0 +1,21 @@
+{
+  "_info": "Apps da suíte Forma. 'repo' é o repositório oficial (MIT/Apache-2.0); 'version' é a versão usada se a API do GitHub não responder no build.",
+  "apps": [
+    { "id": "foto", "name": "Forma Foto", "repo": "storytold/photocraft", "upstream": "PhotoCraft", "version": "0.20.1", "category": "imagem", "like": "Photoshop", "icon": "Image", "color": "#7c5cff", "desc": "Editor de imagens com PSD, camadas, máscaras, 70+ filtros e seleção de objeto." },
+    { "id": "vetor", "name": "Forma Vetor", "repo": "storytold/vectorcraft", "upstream": "VectorCraft", "version": "0.21.0", "category": "imagem", "like": "Illustrator", "icon": "PenTool", "color": "#ff9f43", "desc": "Ilustração vetorial: caneta, formas, gradientes e SVG." },
+    { "id": "revela", "name": "Forma Revela", "repo": "storytold/lightcraft", "upstream": "LightCraft", "version": "0.18.0", "category": "imagem", "like": "Lightroom", "icon": "Aperture", "color": "#2ec5ff", "desc": "Biblioteca de fotos e revelação de RAW com ajustes não destrutivos." },
+    { "id": "interface", "name": "Forma Interface", "repo": "storytold/figcraft", "upstream": "FigCraft", "version": "0.15.0", "category": "imagem", "like": "Figma", "icon": "Frame", "color": "#ff5c9a", "desc": "Design de interfaces e protótipos com frames, componentes e auto layout." },
+    { "id": "filme", "name": "Forma Filme", "repo": "storytold/filmcraft", "upstream": "FilmCraft", "version": "0.17.0", "category": "video", "like": "Premiere Pro", "icon": "Clapperboard", "color": "#ff6b6b", "desc": "Edição de vídeo com linha do tempo, cor, efeitos e transições." },
+    { "id": "motion", "name": "Forma Motion", "repo": "storytold/effectcraft", "upstream": "EffectCraft", "version": "0.21.0", "category": "video", "like": "After Effects", "icon": "WandSparkles", "color": "#a259ff", "desc": "Composição e motion: keyframes, 300+ efeitos, câmeras 3D e fila de render." },
+    { "id": "som", "name": "Forma Som", "repo": "storytold/soundcraft", "upstream": "SoundCraft", "version": "0.17.0", "category": "video", "like": "Audition / DAW", "icon": "AudioLines", "color": "#3ddc97", "desc": "Estúdio de áudio multipista com mixer, plugins, automação e MIDI." },
+    { "id": "layout", "name": "Forma Layout", "repo": "storytold/designcraft", "upstream": "DesignCraft", "version": "0.17.0", "category": "documentos", "like": "InDesign", "icon": "LayoutTemplate", "color": "#ff7aa8", "desc": "Diagramação de páginas: revistas, livros, folhetos e PDF para impressão." },
+    { "id": "pdf", "name": "Forma PDF", "repo": "storytold/pdfcraft", "upstream": "PdfCraft", "version": "0.18.0", "category": "documentos", "like": "Acrobat", "icon": "FileType", "color": "#ff5c5c", "desc": "Ler, anotar, editar, juntar e assinar PDFs." },
+    { "id": "texto", "name": "Forma Texto", "repo": "storytold/wordcraft", "upstream": "WordCraft", "version": "0.15.0", "category": "documentos", "like": "Word", "icon": "FileText", "color": "#3b82f6", "desc": "Processador de texto com estilos, tabelas, revisão e arquivos .docx." },
+    { "id": "planilha", "name": "Forma Planilha", "repo": "storytold/gridcraft", "upstream": "GridCraft", "version": "0.16.0", "category": "documentos", "like": "Excel", "icon": "Sheet", "color": "#22c55e", "desc": "Planilhas com fórmulas, gráficos e arquivos .xlsx." },
+    { "id": "slides", "name": "Forma Slides", "repo": "storytold/deckcraft", "upstream": "DeckCraft", "version": "0.15.0", "category": "documentos", "like": "PowerPoint", "icon": "Presentation", "color": "#f97316", "desc": "Apresentações com temas, gráficos, transições e arquivos .pptx." },
+    { "id": "cad", "name": "Forma CAD", "repo": "storytold/cadcraft", "upstream": "CADCraft", "version": "0.17.0", "category": "documentos", "like": "AutoCAD", "icon": "DraftingCompass", "color": "#d4ff3a", "desc": "Desenho técnico 2D com snaps, camadas, cotas, blocos e DXF." }
+  ],
+  "desktopOnly": [
+    { "id": "textura", "name": "Forma Textura", "repo": "Aalzard/subcraft", "upstream": "SubCraft", "like": "Substance Painter", "icon": "Box", "color": "#ff7a1a", "desc": "Pintura de texturas 3D com materiais PBR. Só existe para computador (Windows e Linux)." }
+  ]
+}

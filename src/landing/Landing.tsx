@@ -1,5 +1,6 @@
 import { ArrowRight, Brush, Crown, Download, Heart, House, Images, Keyboard, Layers, MousePointer2, Pin, Shapes, ShieldCheck, Sparkles, Star, Type, Wand2, Zap } from 'lucide-react';
 import { Logo } from '../Logo';
+import { APPS, AppIcon } from '../apps/AppsHub';
 import { ToolIcon } from '../editor/ui';
 
 const openEditor = () => { location.hash = '#/editor'; };
@@ -50,6 +51,7 @@ export default function Landing() {
           <Logo size={30} word />
           <div className="nav-links">
             <a href="#recursos">Recursos</a>
+            <a href="#/apps">Apps</a>
             <a href="#atalhos">Atalhos</a>
             <a href="#como">Como funciona</a>
           </div>
@@ -212,6 +214,23 @@ export default function Landing() {
             <a className="btn ghost sm" href="#/pro" style={{ alignSelf: 'flex-start', marginTop: 14 }}><Crown size={14} />Abrir o modo Pro</a>
           </article>
         </div>
+      </section>
+
+      <section className="section wrap" id="suite">
+        <div className="section-head">
+          <span className="kicker">Suíte Forma</span>
+          <h2>Uma suíte criativa inteira, dentro do Forma.</h2>
+          <p>Além do editor, o Forma abre 13 apps completos no navegador: foto, vetor, vídeo, motion, áudio, diagramação, PDF, texto, planilha, slides e CAD.</p>
+        </div>
+        <div className="suite-grid">
+          {APPS.map((a) => (
+            <a key={a.id} className="suite-app" href={`#/apps/${a.id}`} style={{ ['--c' as any]: a.color }}>
+              <AppIcon app={a} size={42} />
+              <span><b>{a.name.replace('Forma ', '')}</b><small>{a.like}</small></span>
+            </a>
+          ))}
+        </div>
+        <a className="btn lime" href="#/apps" style={{ marginTop: 22 }}>Ver todos os apps <ArrowRight size={16} /></a>
       </section>
 
       <section className="section wrap" id="atalhos">

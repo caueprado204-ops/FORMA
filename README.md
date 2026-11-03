@@ -21,6 +21,36 @@ Editor de imagens no navegador, no estilo Photoshop, com interface própria da F
   - **Link de pin**: cole qualquer link `pinterest.com/pin/…` ou `pin.it/…`; funciona sem login
   - **Banco livre**: fotos Creative Commons do Flickr e da Wikimedia (via Openverse) que permitem edição e uso comercial; o autor e a licença vão no nome da camada
 
+## Suíte de apps (`#/apps`)
+
+O Forma também abre 13 apps completos dentro dele, com hub, troca rápida entre apps e lançador no editor:
+
+| App no Forma | Projeto original | Parecido com |
+|---|---|---|
+| Forma Foto | PhotoCraft | Photoshop |
+| Forma Vetor | VectorCraft | Illustrator |
+| Forma Revela | LightCraft | Lightroom |
+| Forma Interface | FigCraft | Figma |
+| Forma Filme | FilmCraft | Premiere Pro |
+| Forma Motion | EffectCraft | After Effects |
+| Forma Som | SoundCraft | Audition / DAW |
+| Forma Layout | DesignCraft | InDesign |
+| Forma PDF | PdfCraft | Acrobat |
+| Forma Texto | WordCraft | Word |
+| Forma Planilha | GridCraft | Excel |
+| Forma Slides | DeckCraft | PowerPoint |
+| Forma CAD | CADCraft | AutoCAD |
+
+Forma Textura (SubCraft) só existe para computador; o hub leva para o download.
+
+**Como funciona:** no fim do `npm run build`, `scripts/fetch-apps.mjs` baixa os pacotes web oficiais (`<app>-web-<versão>.zip`) dos releases de cada projeto e coloca em `dist/apps/<id>/`. Ele procura a versão mais nova pela API do GitHub e, se ela não responder, usa a versão de `src/apps/catalog.json`. Um app que falhar aparece como indisponível, sem quebrar o build. Os apps não ficam no repositório.
+
+- `SKIP_APPS=1 npm run build` pula o download (build rápido)
+- `APPS_ONLY=foto,pdf` baixa só alguns
+- `GITHUB_TOKEN` (opcional, na Vercel) evita o limite de consultas da API do GitHub
+
+Cada app mantém a própria interface e a própria marca dentro da janela: são as versões oficiais, sem modificação, sob licença MIT ou Apache-2.0. A Forma não é afiliada aos autores.
+
 ## Rodar localmente
 
 ```bash
@@ -55,6 +85,7 @@ O login fica em cookies `HttpOnly` no navegador de cada pessoa; o token nunca ch
 ## Estrutura
 
 ```
+scripts/fetch-apps.mjs     # baixa as versões web dos apps no build
 api/                       # funções da Vercel
 ├── pinterest/             # login, callback, me, logout, boards, pins, pin (link)
 ├── stock.ts               # banco livre (Openverse)
@@ -64,6 +95,7 @@ api/                       # funções da Vercel
 src/
 ├── landing/Landing.tsx    # landing page
 ├── pro/ProEditor.tsx      # modo Pro (Photopea embutido)
+├── apps/                  # suíte de apps: catálogo, hub, janela do app e lançador
 ├── editor/
 │   ├── engine.ts          # motor sobre o Fabric.js: camadas, ferramentas, histórico, exportação
 │   ├── commands.ts        # menus, atalhos e paleta de comandos (uma lista só)
@@ -87,6 +119,7 @@ src/
 - [Fabric.js](https://fabricjs.com) — motor de canvas (MIT)
 - [Lucide](https://lucide.dev) — ícones do banco de elementos (ISC)
 - [Photopea](https://www.photopea.com/api/) — editor do modo Pro, embutido pela API pública
+- Apps da suíte: [PhotoCraft, VectorCraft, LightCraft, FigCraft, FilmCraft, EffectCraft, SoundCraft, DesignCraft, PdfCraft, WordCraft, GridCraft, DeckCraft, CADCraft](https://github.com/storytold) (MIT/Apache-2.0), versões web oficiais sem modificação; [SubCraft](https://github.com/Aalzard/subcraft) (MIT/Apache-2.0)
 - [PhotoSplice](https://github.com/eolix/PhotoSplice) / [PhotoCraft](https://github.com/storytold/photocraft) (MIT/Apache-2.0) — de onde vêm:
   - ícones das ferramentas: [Tabler Icons](https://tabler.io/icons), MIT (`src/assets/tools/LICENSE-tabler.txt`)
   - LUTs de cor: [Fresh LUTs](https://freshluts.com), CC0, reamostrados para 17×17×17
