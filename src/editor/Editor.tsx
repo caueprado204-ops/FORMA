@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FabricImage } from 'fabric';
 import {
   ChevronDown, Command as CommandIcon, Download, FilePlus, FolderOpen, ImagePlus, Keyboard, Maximize, Minus,
-  PanelRight, Plus, Redo2, Search, Undo2, ArrowLeft, Monitor, Smartphone, Presentation, Square, FileImage, Clock, Images, Shapes, Crown,
+  PanelRight, Plus, Redo2, Search, Undo2, ArrowLeft, Monitor, Smartphone, Presentation, Square, FileImage, Clock, Images, Shapes, Crown, Clapperboard,
 } from 'lucide-react';
 import { Library, type LibraryTab } from './Library';
 import { BANK_MIME, ELEMENT_MIME, type Inserter } from './library-types';
@@ -279,6 +279,7 @@ function TopBar({ e, run, ui }: { e: FormaEngine; run: (c: Command) => void; ui:
       <div className="topbar-right">
         <IconBtn tip="Desfazer (Ctrl+Z)" onClick={() => e.undo()} disabled={e.historyIndex <= 0}><Undo2 size={16} /></IconBtn>
         <IconBtn tip="Refazer (Ctrl+Shift+Z)" onClick={() => e.redo()} disabled={e.historyIndex >= e.history.length - 1}><Redo2 size={16} /></IconBtn>
+        <a className="btn ghost sm" href="#/video" data-tip="Editor de vídeo"><Clapperboard size={14} />Vídeo</a>
         <AppsLauncher />
         <button className="palette-btn" onClick={() => ui.dialog('palette')}>
           <Search size={14} /><span>Buscar comando</span><kbd>{formatKeys('mod+k')}</kbd>

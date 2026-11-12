@@ -51,6 +51,7 @@ export default function Landing() {
           <Logo size={30} word />
           <div className="nav-links">
             <a href="#recursos">Recursos</a>
+            <a href="#/video">Vídeo</a>
             <a href="#/apps">Apps</a>
             <a href="#atalhos">Atalhos</a>
             <a href="#como">Como funciona</a>
@@ -220,8 +221,24 @@ export default function Landing() {
         <div className="section-head">
           <span className="kicker">Suíte Forma</span>
           <h2>Uma suíte criativa inteira, dentro do Forma.</h2>
-          <p>Além do editor, o Forma abre 13 apps completos no navegador: foto, vetor, vídeo, motion, áudio, diagramação, PDF, texto, planilha, slides e CAD.</p>
+          <p>Além do editor de imagem, o Forma tem um editor de vídeo próprio e abre 13 apps completos no navegador: foto, vetor, vídeo, motion, áudio, diagramação, PDF, texto, planilha, slides e CAD.</p>
         </div>
+        <a className="video-feature" href="#/video">
+          <span className="vf-copy">
+            <span className="kicker">Novo · Forma Vídeo</span>
+            <b>Edite vídeos como um profissional, no navegador.</b>
+            <span>Linha do tempo com várias trilhas de vídeo e áudio, lâmina, aparar com ondulação, transições, keyframes, títulos, correção de cor, medidores de áudio e exportação em WebM ou MP4.</span>
+            <span className="btn lime sm">Abrir o Forma Vídeo <ArrowRight size={14} /></span>
+          </span>
+          <span className="vf-tl" aria-hidden="true">
+            <span className="vf-ruler" />
+            <span className="vf-row"><i style={{ left: '30%', width: '28%', background: '#d6457f' }}>Título</i></span>
+            <span className="vf-row"><i style={{ left: '2%', width: '45%', background: '#6f5cf0' }}>Abertura</i><i style={{ left: '47%', width: '50%', background: '#6f5cf0' }}>Cena 2</i><em style={{ left: '43%' }} /></span>
+            <span className="vf-row a"><i style={{ left: '2%', width: '45%' }} /><i style={{ left: '47%', width: '50%' }} /></span>
+            <span className="vf-row a"><i style={{ left: '0%', width: '96%' }}>Trilha sonora</i></span>
+            <span className="vf-head" />
+          </span>
+        </a>
         <div className="suite-grid">
           {APPS.map((a) => (
             <a key={a.id} className="suite-app" href={`#/apps/${a.id}`} style={{ ['--c' as any]: a.color }}>

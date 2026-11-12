@@ -21,6 +21,22 @@ Editor de imagens no navegador, no estilo Photoshop, com interface própria da F
   - **Link de pin**: cole qualquer link `pinterest.com/pin/…` ou `pin.it/…`; funciona sem login
   - **Banco livre**: fotos Creative Commons do Flickr e da Wikimedia (via Openverse) que permitem edição e uso comercial; o autor e a licença vão no nome da camada
 
+## Forma Vídeo (`#/video`)
+
+Editor de vídeo próprio do Forma, com cara de editor profissional:
+
+- **Projeto:** importe vídeo, áudio e imagens (arrastar ou botão). Miniaturas, forma de onda e duração são lidas no navegador, e os arquivos ficam guardados no IndexedDB para o projeto reabrir depois
+- **Linha do tempo:** trilhas V1–V3 e A1–A3 (adicione mais), vídeo com áudio vinculado, mover entre trilhas, aparar bordas, aparar com ondulação (Ctrl+arrastar), lâmina, cortar no indicador (Ctrl+K), exclusão com ondulação, fechar espaço, encaixe, seleção por retângulo, marcadores, entrada/saída, zoom e bloqueio/silenciar/solo por trilha
+- **Monitor de programa:** código de tempo editável, transporte completo, margens de segurança, tela cheia e exportar quadro
+- **Controles de efeito:** posição, escala, rotação e opacidade com keyframes (cronômetro e navegação), modos de mesclagem, velocidade, volume com keyframes e fades
+- **Cor:** exposição, contraste, saturação, temperatura, matiz, desfoque, vinheta, P&B, sépia e predefinições
+- **Transições:** dissolver, mergulho no preto/branco, cortinas, deslizar, empurrar, zoom e desfoque, com alinhamento no corte
+- **Títulos e fundos de cor** com as mais de 370 fontes do Forma, e a biblioteca de imagens e elementos
+- **Medidores de áudio** e mixagem pelo WebAudio
+- **Exportação** em tempo real (canvas + áudio) para WebM (VP9/Opus) ou MP4 (H.264/AAC, quando o navegador grava MP4)
+
+O modelo de edição (sequência, trilhas, itens com início/duração/entrada na mídia/velocidade, transições com "de"/"para" e alinhamento no corte, parâmetros com keyframes) segue a estrutura do [FilmCraft](https://github.com/storytold/filmcraft) (MIT/Apache-2.0), reescrita em TypeScript para o navegador. O tempo de edição é contado em quadros inteiros.
+
 ## Suíte de apps (`#/apps`)
 
 O Forma também abre 13 apps completos dentro dele, com hub, troca rápida entre apps e lançador no editor:
@@ -96,6 +112,7 @@ src/
 ├── landing/Landing.tsx    # landing page
 ├── pro/ProEditor.tsx      # modo Pro (Photopea embutido)
 ├── apps/                  # suíte de apps: catálogo, hub, janela do app e lançador
+├── video/                 # Forma Vídeo: modelo, motor de reprodução, mídia, linha do tempo, painéis
 ├── editor/
 │   ├── engine.ts          # motor sobre o Fabric.js: camadas, ferramentas, histórico, exportação
 │   ├── commands.ts        # menus, atalhos e paleta de comandos (uma lista só)
@@ -117,6 +134,8 @@ src/
 ## Créditos
 
 - [Fabric.js](https://fabricjs.com) — motor de canvas (MIT)
+- [FilmCraft](https://github.com/storytold/filmcraft) — referência do modelo de edição do Forma Vídeo (MIT/Apache-2.0)
+- [fix-webm-duration](https://github.com/yusitnikov/fix-webm-duration) — duração nos WebM exportados (MIT)
 - [Lucide](https://lucide.dev) — ícones do banco de elementos (ISC)
 - [Photopea](https://www.photopea.com/api/) — editor do modo Pro, embutido pela API pública
 - Apps da suíte: [PhotoCraft, VectorCraft, LightCraft, FigCraft, FilmCraft, EffectCraft, SoundCraft, DesignCraft, PdfCraft, WordCraft, GridCraft, DeckCraft, CADCraft](https://github.com/storytold) (MIT/Apache-2.0), versões web oficiais sem modificação; [SubCraft](https://github.com/Aalzard/subcraft) (MIT/Apache-2.0)

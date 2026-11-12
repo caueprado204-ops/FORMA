@@ -5,6 +5,7 @@ import './styles.css';
 
 const Editor = lazy(() => import('./editor/Editor'));
 const ProEditor = lazy(() => import('./pro/ProEditor'));
+const VideoEditor = lazy(() => import('./video/VideoEditor'));
 const AppsHub = lazy(() => import('./apps/AppsHub').then((m) => ({ default: m.AppsHub })));
 const AppView = lazy(() => import('./apps/AppsHub').then((m) => ({ default: m.AppView })));
 
@@ -18,13 +19,21 @@ function App() {
   const inPro = route.startsWith('#/pro');
   const appMatch = route.match(/^#\/apps\/([a-z0-9-]+)/);
   const inHub = route.startsWith('#/apps') && !appMatch;
-  const inEditor = route.startsWith('#/editor') || inPro || !!appMatch;
+  const inVideo = route.startsWith('#/video');
+  const inEditor = route.startsWith('#/editor') || inPro || !!appMatch || inVideo;
   useEffect(() => {
     document.body.classList.toggle('in-editor', inEditor);
     document.body.classList.toggle('in-hub', inHub);
-    if (appMatch) return;
+    if (appMatch || inVideo) return;
     document.title = inHub ? 'Apps — Forma Studio' : inPro ? 'Forma Studio — Modo Pro' : inEditor ? 'Forma Studio — Editor' : 'Forma Studio — editor de imagens no navegador';
-  }, [inEditor, inHub, !!appMatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [inEditor, inHub, !!appMatch, inVideo]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (inVideo) {
+    return (
+      <Suspense fallback={<div className="boot"><span className="boot-dot" />Carregando o Forma Vídeo…</div>}>
+        <VideoEditor />
+      </Suspense>
+    );
+  }
   if (appMatch) {
     return (
       <Suspense fallback={<div className="boot"><span className="boot-dot" />Abrindo o app…</div>}>

@@ -58,6 +58,7 @@ export function AppsHub() {
         <a className="brand" href="#" aria-label="Página inicial"><Logo size={28} word /></a>
         <nav className="hub-nav">
           <a href="#/editor"><Palette size={15} />Editor Forma</a>
+          <a href="#/video"><Clapperboard size={15} />Vídeo</a>
           <a className="on" href="#/apps"><LayoutGrid size={15} />Apps</a>
         </nav>
         <div className="hub-search">
@@ -70,6 +71,18 @@ export function AppsHub() {
         <span className="kicker">Suíte Forma</span>
         <h1>Todos os seus apps criativos, no navegador.</h1>
         <p>Foto, vetor, vídeo, motion, áudio, diagramação, PDF, texto, planilha, slides e CAD. Tudo abre aqui dentro, sem instalar, e seus arquivos ficam no seu computador.</p>
+      </section>
+
+      <section className="hub-sec">
+        <a className="hub-featured" href="#/video">
+          <span className="app-ico" style={{ width: 56, height: 56, ['--c' as any]: '#7c5cff' }}><Clapperboard size={28} strokeWidth={1.8} /></span>
+          <span className="hub-featured-body">
+            <span className="pill ok">Feito pelo Forma</span>
+            <b>Forma Vídeo</b>
+            <span>Editor de vídeo profissional com linha do tempo de várias trilhas, cortes, transições, keyframes, títulos, correção de cor, mixagem de áudio e exportação. Abre na hora, sem baixar nada.</span>
+          </span>
+          <span className="app-open">Abrir →</span>
+        </a>
       </section>
 
       {CATS.map((c) => {
